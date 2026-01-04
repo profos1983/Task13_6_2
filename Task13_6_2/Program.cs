@@ -4,7 +4,6 @@ using System.Net.WebSockets;
 using static System.Net.Mime.MediaTypeNames;
 
 string pathToRaed = "C:\\Code\\Repose\\Task13_6_2\\Task13_6_2\\input.txt";
-string pathToWrite = "C:\\Code\\Repose\\Task13_6_2\\Task13_6_2\\output.txt"; // возможно не потребуется
 
 // Создаем список, который будет содержать все строки из исходного текста, без знаков пунктуации 
 List<string> textNoPunctuation = new List<string>();
@@ -16,49 +15,58 @@ Dictionary<string, int> uniqueWords = new Dictionary<string, int>();
 using (StreamReader sr = File.OpenText(pathToRaed))
 {
     string str = "";
-    while ((str = sr.ReadLine()) != null) // Пока не кончатся строки - считываем из файла по одной и выводим в консоль
+    while ((str = sr.ReadLine()) != null) // Пока не кончатся строки - считываем из файла по одной
     {
         var noPunctuationText = new string(str.Where(c => !char.IsPunctuation(c)).ToArray());
         textNoPunctuation.Add(noPunctuationText);
     }
 }
 
-// Записываем полученный список слов без знаков пунктуации в файл.
-using (StreamWriter sw = File.CreateText(pathToWrite))  // Конструкция Using (будет рассмотрена в последующих юнитах)
+// Разбиваем строки на слова
+for (int i = 0; i < textNoPunctuation.Count; i++)
 {
-    foreach (var str in textNoPunctuation)
+    // Вынимаем строку из исходного текста
+    string stringFromText = textNoPunctuation[i].ToString();
+
+    // Удаляем из вынутой строки символы перехода строки /n
+    stringFromText.Trim('\n', '\r');
+
+    // Преобразуем выделенную строку в массив слов
+    string[] wordsArray = stringFromText.Split(' ');
+
+    // Каждое слово пытаемся записать в словарь, если слово уже есть, то увеличиваем счетчик
+    foreach (var word in wordsArray)
     {
-        sw.WriteLine(str); 
-    }
-}
+        
+        // Пропускаем пустые строки.
+        if (word == "")
+        {
+            break;
+        }
 
-
-//// Основной метод для поиска уникальных слов и количества их повторений
-//foreach (string str in textNoPunctuation)
-//{
-//    var strInText = str;
-//    Console.WriteLine(strInText);
-//}
-
-for (int i = 0; i < 30; i++)
-{
-    string[] stringInText = textNoPunctuation[i].Split(' ');
-
-    foreach (var word in stringInText)
-    {
+        // Если находим слово в словаре, то увеличиваем счетчик
         if (uniqueWords.ContainsKey(word))
         {
             uniqueWords[word]++;
         }
+
+        // Если слово не нейдено, то вставляем его в словарь, счетчик задаем равным 1
         else
         {
-            uniqueWords.Add(word, 0);
+            uniqueWords.Add(word, 1);
         }
     }
 }
 
-foreach (var wd in uniqueWords)
+// сортируем полученный массив слов по количеству повторений
+var sortedWords = uniqueWords.OrderByDescending(pair => pair.Value).ToArray();
+
+// Вывод тестового массива слов с их количеством
+Console.WriteLine("Список двадцати слов, наиболее часто встречающихся в исходном тексте.");
+Console.WriteLine("---------------------------------------------------------------------");
+for (int i = 0; i < 20; i++)
 {
-    Console.WriteLine(wd.Key + " " + wd.Value);
+    Console.WriteLine("Слово - " + sortedWords[i].Key + " " + ", Количество повторений - " + sortedWords[i].Value);
 }
+
 
